@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "langextract-dspy"
-version = "1.0.0"
+version = "1.0.1"
 description = "DSPy-powered prompt optimization plugin for LangExtract — auto-optimize extraction prompts with MIPROv2 and GEPA"
 readme = "README.md"
 requires-python = ">=3.12"

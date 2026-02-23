@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.1 (2026-02-23)
+
+### Bug Fixes
+
+- Enable strict mode in zip for improved consistency in extraction and testing
+  ([`8fd380a`](https://github.com/IgnatG/langextract-dspy/commit/8fd380a4971f80329e74d7836c30afc1b91cd2c3))
+
+
 ## v1.0.0 (2026-02-22)
 
 - Initial Release
