@@ -1,8 +1,8 @@
-# LangExtract DSPy Optimizer
+# LangCore DSPy Optimizer
 
-A plugin for [LangExtract](https://github.com/google/langextract) that uses [DSPy](https://dspy.ai/) to automatically optimize extraction prompts and few-shot examples. Inspired by [LangStruct](https://github.com/langstruct/langstruct)'s DSPy integration.
+A plugin for [LangCore](https://github.com/google/langcore) that uses [DSPy](https://dspy.ai/) to automatically optimize extraction prompts and few-shot examples. Inspired by [LangStruct](https://github.com/langstruct/langstruct)'s DSPy integration.
 
-> **Note**: This is a third-party plugin for LangExtract. For the main LangExtract library, visit [google/langextract](https://github.com/google/langextract).
+> **Note**: This is a third-party plugin for LangCore. For the main LangCore library, visit [google/langcore](https://github.com/google/langcore).
 
 ## Installation
 
@@ -10,20 +10,20 @@ Install from source:
 
 ```bash
 git clone <repo-url>
-cd langextract-dspy
+cd langcore-dspy
 pip install -e .
 ```
 
 ## Features at a Glance
 
-| Feature | langextract-dspy | LangStruct |
+| Feature | langcore-dspy | LangStruct |
 |---|---|---|
 | **MIPROv2 optimizer** | ✅ Fast, general-purpose | ✅ |
 | **GEPA optimizer** | ✅ Reflective, feedback-driven (falls back to BootstrapFewShot) | ✅ |
 | **Optimizer aliases** | ✅ `mipro`, `mipro_v2`, `gepa` | ❌ |
 | **Persist optimized configs** | ✅ `save()` / `load()` to directory | ✅ |
 | **Evaluation (precision/recall/F1)** | ✅ `evaluate()` with per-document details | ⚠️ Basic metrics |
-| **LangExtract integration** | ✅ Native `optimized_config` parameter | ❌ (separate pipeline) |
+| **LangCore integration** | ✅ Native `optimized_config` parameter | ❌ (separate pipeline) |
 | **Any LLM backend** | ✅ Via DSPy's LM abstraction | ✅ |
 
 ## Quick Start
@@ -31,8 +31,8 @@ pip install -e .
 ### 1. Optimize Your Extraction Prompt
 
 ```python
-from langextract_dspy import DSPyOptimizer
-import langextract as lx
+from langcore_dspy import DSPyOptimizer
+import langcore as lx
 
 # Prepare training data
 examples = [
@@ -78,7 +78,7 @@ print(f"Metadata: {config.metadata}")
 config.save("./optimized_invoice_extractor")
 
 # Load later
-from langextract_dspy import OptimizedConfig
+from langcore_dspy import OptimizedConfig
 config = OptimizedConfig.load("./optimized_invoice_extractor")
 ```
 
@@ -176,7 +176,7 @@ class OptimizedConfig:
 ## Requirements
 
 - Python ≥ 3.10
-- `langextract-core` ≥ 1.2.0
+- `langcore` ≥ 1.2.0
 - `dspy` ≥ 2.6.0
 
 ## License

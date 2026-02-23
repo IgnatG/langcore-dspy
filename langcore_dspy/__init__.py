@@ -1,12 +1,12 @@
-"""LangExtract DSPy prompt optimization plugin.
+"""LangCore DSPy prompt optimization plugin.
 
 Auto-optimise extraction prompts using DSPy's MIPROv2 and GEPA
 optimizers.  Produces an ``OptimizedConfig`` that can be saved,
 loaded, and passed directly to ``lx.extract()``.
 """
 
-from langextract_dspy.config import OptimizedConfig
-from langextract_dspy.optimizer import DSPyOptimizer
+from langcore_dspy.config import OptimizedConfig
+from langcore_dspy.optimizer import DSPyOptimizer
 
 __all__ = [
     "DSPyOptimizer",

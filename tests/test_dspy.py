@@ -1,8 +1,8 @@
-"""Tests for langextract_dspy package.
+"""Tests for langcore_dspy package.
 
 Covers OptimizedConfig persistence (save/load), evaluation, the
 DSPyOptimizer class (input validation, DSPy delegation), and the
-optimized_config integration with langextract-core's extract().
+optimized_config integration with langcore's extract().
 """
 
 from __future__ import annotations
@@ -14,16 +14,16 @@ from unittest import mock
 
 import dspy
 import pytest
-from langextract.core import types as lx_types
-from langextract.core.data import ExampleData, Extraction
+from langcore.core import types as lx_types
+from langcore.core.data import ExampleData, Extraction
 
-from langextract_dspy.config import (
+from langcore_dspy.config import (
     OptimizedConfig,
     _dict_to_example,
     _example_to_dict,
     _flatten_extractions,
 )
-from langextract_dspy.helpers import extraction_key_set_from_extractions
+from langcore_dspy.helpers import extraction_key_set_from_extractions
 
 if TYPE_CHECKING:
     import pathlib
@@ -377,7 +377,7 @@ class TestDSPyOptimizerValidation:
 
     def test_length_mismatch_raises(self) -> None:
         """Mismatched train_texts / expected_results raises."""
-        from langextract_dspy.optimizer import DSPyOptimizer
+        from langcore_dspy.optimizer import DSPyOptimizer
 
         opt = DSPyOptimizer(model_id="test/model")
         with pytest.raises(ValueError, match="same length"):
@@ -393,7 +393,7 @@ class TestDSPyOptimizerValidation:
 
     def test_unknown_optimizer_raises(self) -> None:
         """Unknown optimizer name raises ValueError."""
-        from langextract_dspy.optimizer import DSPyOptimizer
+        from langcore_dspy.optimizer import DSPyOptimizer
 
         opt = DSPyOptimizer(model_id="test/model")
         with pytest.raises(ValueError, match="Unknown optimizer"):
@@ -416,7 +416,7 @@ class TestDSPyOptimizerMocked:
 
     def test_optimize_miprov2_returns_config(self) -> None:
         """optimize() returns an OptimizedConfig."""
-        from langextract_dspy.optimizer import DSPyOptimizer
+        from langcore_dspy.optimizer import DSPyOptimizer
 
         opt = DSPyOptimizer(model_id="test/model")
 
@@ -450,7 +450,7 @@ class TestDSPyOptimizerMocked:
 
     def test_optimize_gepa_falls_back(self) -> None:
         """optimize() with gepa delegates correctly."""
-        from langextract_dspy.optimizer import DSPyOptimizer
+        from langcore_dspy.optimizer import DSPyOptimizer
 
         opt = DSPyOptimizer(model_id="test/model")
 
@@ -476,7 +476,7 @@ class TestDSPyOptimizerMocked:
 
     def test_optimize_aliases(self) -> None:
         """Alternative optimizer names work (mipro, mipro_v2)."""
-        from langextract_dspy.optimizer import DSPyOptimizer
+        from langcore_dspy.optimizer import DSPyOptimizer
 
         opt = DSPyOptimizer(model_id="test/model")
 
@@ -509,7 +509,7 @@ class TestScoringHelpers:
 
     def test_parse_extractions_json(self) -> None:
         """Parse a valid JSON array."""
-        from langextract_dspy.optimizer import (
+        from langcore_dspy.optimizer import (
             _parse_extractions_json,
         )
 
@@ -527,7 +527,7 @@ class TestScoringHelpers:
 
     def test_parse_fenced_json(self) -> None:
         """Parse JSON wrapped in markdown code fences."""
-        from langextract_dspy.optimizer import (
+        from langcore_dspy.optimizer import (
             _parse_extractions_json,
         )
 
@@ -537,7 +537,7 @@ class TestScoringHelpers:
 
     def test_parse_invalid_json(self) -> None:
         """Invalid JSON returns empty list."""
-        from langextract_dspy.optimizer import (
+        from langcore_dspy.optimizer import (
             _parse_extractions_json,
         )
 
@@ -546,7 +546,7 @@ class TestScoringHelpers:
 
     def test_parse_extractions_wrapper(self) -> None:
         """Parse JSON with an 'extractions' wrapper key."""
-        from langextract_dspy.optimizer import (
+        from langcore_dspy.optimizer import (
             _parse_extractions_json,
         )
 
@@ -567,7 +567,7 @@ class TestScoringHelpers:
         """F1 metric: perfect prediction yields 1.0."""
         import dspy
 
-        from langextract_dspy.optimizer import _f1_metric
+        from langcore_dspy.optimizer import _f1_metric
 
         expected = json.dumps([{"extraction_class": "A", "extraction_text": "a"}])
         example = dspy.Example(expected_json=expected)
@@ -583,7 +583,7 @@ class TestScoringHelpers:
         """F1 metric: no overlap yields 0.0."""
         import dspy
 
-        from langextract_dspy.optimizer import _f1_metric
+        from langcore_dspy.optimizer import _f1_metric
 
         expected = json.dumps([{"extraction_class": "A", "extraction_text": "a"}])
         prediction = dspy.Prediction(
@@ -606,7 +606,7 @@ class TestExtractOptimizedConfig:
     def test_optimized_config_overrides_params(self) -> None:
         """When optimized_config is provided, it overrides prompt
         and examples."""
-        from langextract.core import base_model, data
+        from langcore.core import base_model, data
 
         class _DummyModel(base_model.BaseLanguageModel):
             def __init__(self) -> None:
@@ -636,7 +636,7 @@ class TestExtractOptimizedConfig:
             metadata={"optimizer": "miprov2"},
         )
 
-        import langextract as lx
+        import langcore as lx
 
         result = lx.extract(
             text_or_documents="Some input text.",
@@ -650,7 +650,7 @@ class TestExtractOptimizedConfig:
 
     def test_optimized_config_none_is_noop(self) -> None:
         """optimized_config=None doesn't change behaviour."""
-        from langextract.core import base_model
+        from langcore.core import base_model
 
         class _DummyModel(base_model.BaseLanguageModel):
             def __init__(self) -> None:
@@ -681,8 +681,8 @@ def lx_extract_with_model(
     prompt: str = "Extract entities",
 ) -> Any:
     """Helper to call lx.extract with a dummy model."""
-    import langextract as lx
-    from langextract.core.data import ExampleData, Extraction
+    import langcore as lx
+    from langcore.core.data import ExampleData, Extraction
 
     return lx.extract(
         text_or_documents="Some text with Entity",
@@ -709,7 +709,7 @@ class TestAsyncExtractOptimizedConfig:
 
     def test_async_extract_with_optimized_config(self) -> None:
         """async_extract uses optimized_config overrides."""
-        from langextract.core import base_model, data
+        from langcore.core import base_model, data
 
         class _DummyModel(base_model.BaseLanguageModel):
             def __init__(self) -> None:
@@ -738,7 +738,7 @@ class TestAsyncExtractOptimizedConfig:
             ],
         )
 
-        import langextract as lx
+        import langcore as lx
 
         result = asyncio.run(
             lx.async_extract(

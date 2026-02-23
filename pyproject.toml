@@ -3,20 +3,20 @@ requires = ["setuptools>=82.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "langextract-dspy"
+name = "langcore-dspy"
 version = "1.0.2"
-description = "DSPy-powered prompt optimization plugin for LangExtract — auto-optimize extraction prompts with MIPROv2 and GEPA"
+description = "DSPy-powered prompt optimization plugin for LangCore — auto-optimize extraction prompts with MIPROv2 and GEPA"
 readme = "README.md"
 requires-python = ">=3.12"
 license = "Apache-2.0"
 dependencies = [
-    "langextract-core>=1.1.0",
+    "langcore>=1.1.0",
     "dspy>=2.6.0",
 ]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["langextract_dspy*"]
+include = ["langcore_dspy*"]
 
 [dependency-groups]
 dev = [
@@ -30,7 +30,7 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 
 [tool.pylint.main]
-extension-pkg-allow-list = ["langextract"]
+extension-pkg-allow-list = ["langcore"]
 
 [tool.pylint."messages control"]
 disable = ["no-member"]
@@ -57,11 +57,11 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["langextract_dspy"]
+known-first-party = ["langcore_dspy"]
 
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
-version_variables = ["langextract_dspy/__init__.py:__version__"]
+version_variables = ["langcore_dspy/__init__.py:__version__"]
 branch = "main"
 build_command = "pip install build && python -m build"
 commit_message = "chore(release): v{version}"
