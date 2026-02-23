@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.2 (2026-02-23)
+
+### Bug Fixes
+
+- Add extraction key set helpers and refactor extraction logic
+  ([`7b225c8`](https://github.com/IgnatG/langextract-dspy/commit/7b225c824d8bd8c0b94af0b7a89409454043c7d8))
+
+
 ## v1.0.1 (2026-02-23)
 
 ### Bug Fixes
