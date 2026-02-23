@@ -21,9 +21,9 @@ from langextract_dspy.config import (
     OptimizedConfig,
     _dict_to_example,
     _example_to_dict,
-    _extraction_key_set,
     _flatten_extractions,
 )
+from langextract_dspy.helpers import extraction_key_set_from_extractions
 
 if TYPE_CHECKING:
     import pathlib
@@ -327,7 +327,7 @@ class TestOptimizedConfigEvaluate:
 
 
 class TestExtractionHelpers:
-    """Verify _flatten_extractions and _extraction_key_set."""
+    """Verify _flatten_extractions and extraction_key_set_from_extractions."""
 
     def test_flatten_single_doc(self) -> None:
         """Flatten a single AnnotatedDocument-like object."""
@@ -362,7 +362,7 @@ class TestExtractionHelpers:
             Extraction("Invoice", "INV-001"),
             Extraction("invoice", "inv-001"),  # duplicate
         ]
-        keys = _extraction_key_set(extractions)
+        keys = extraction_key_set_from_extractions(extractions)
         assert len(keys) == 1
         assert ("invoice", "inv-001") in keys
 

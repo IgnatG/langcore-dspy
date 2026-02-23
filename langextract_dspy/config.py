@@ -14,6 +14,7 @@ import pathlib
 from typing import Any
 
 from langextract.core.data import ExampleData, Extraction
+from langextract_dspy.helpers import extraction_key_set_from_extractions
 
 __all__ = ["OptimizedConfig"]
 
@@ -165,8 +166,8 @@ class OptimizedConfig:
             )
 
             predicted = _flatten_extractions(result)
-            expected_set = _extraction_key_set(expected)
-            predicted_set = _extraction_key_set(predicted)
+            expected_set = extraction_key_set_from_extractions(expected)
+            predicted_set = extraction_key_set_from_extractions(predicted)
 
             tp = len(expected_set & predicted_set)
             fp = len(predicted_set - expected_set)
@@ -259,12 +260,3 @@ def _flatten_extractions(
     if hasattr(result, "extractions") and result.extractions:
         return list(result.extractions)
     return []
-
-
-def _extraction_key_set(
-    extractions: list[Extraction],
-) -> set[tuple[str, str]]:
-    """Build a set of ``(class, text)`` keys for matching."""
-    return {
-        (e.extraction_class.lower(), e.extraction_text.lower()) for e in extractions
-    }

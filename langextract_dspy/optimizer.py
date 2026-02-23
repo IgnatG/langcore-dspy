@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import dspy
 
 from langextract_dspy.config import OptimizedConfig
+from langextract_dspy.helpers import extraction_key_set_from_dicts
 
 if TYPE_CHECKING:
     from langextract.core.data import ExampleData, Extraction
@@ -111,19 +112,6 @@ def _parse_extractions_json(raw: str) -> list[dict[str, str]]:
     return []
 
 
-def _extraction_key_set(
-    extractions: list[dict[str, str]],
-) -> set[tuple[str, str]]:
-    """Build a set of ``(class, text)`` keys from dicts."""
-    keys: set[tuple[str, str]] = set()
-    for ex in extractions:
-        cls = ex.get("extraction_class", "").lower()
-        txt = ex.get("extraction_text", "").lower()
-        if cls and txt:
-            keys.add((cls, txt))
-    return keys
-
-
 def _f1_metric(
     example: dspy.Example,
     prediction: dspy.Prediction,
@@ -134,8 +122,8 @@ def _f1_metric(
     expected_raw: str = getattr(example, "expected_json", "[]")
     expected = _parse_extractions_json(expected_raw)
 
-    pred_set = _extraction_key_set(predicted)
-    exp_set = _extraction_key_set(expected)
+    pred_set = extraction_key_set_from_dicts(predicted)
+    exp_set = extraction_key_set_from_dicts(expected)
 
     if not exp_set:
         return 1.0 if not pred_set else 0.0
@@ -340,6 +328,12 @@ class DSPyOptimizer:
             fallback=prompt_description,
         )
 
+        # --- extract curated examples from compiled module ------- #
+        optimized_examples = self._extract_optimized_examples(
+            optimized_module,
+            fallback=list(examples),
+        )
+
         elapsed = round(time.time() - t0, 2)
         logger.info("Optimization complete in %.2fs", elapsed)
 
@@ -348,13 +342,14 @@ class DSPyOptimizer:
             "model_id": self._model_id,
             "num_train_documents": len(train_texts),
             "num_seed_examples": len(examples),
+            "num_optimized_examples": len(optimized_examples),
             "num_candidates": num_candidates,
             "elapsed_seconds": elapsed,
         }
 
         return OptimizedConfig(
             prompt_description=optimized_prompt,
-            examples=list(examples),
+            examples=optimized_examples,
             metadata=metadata,
         )
 
@@ -457,4 +452,50 @@ class DSPyOptimizer:
         except Exception:
             logger.debug("Could not extract optimised prompt; using fallback.")
 
+        return fallback
+
+    @staticmethod
+    def _extract_optimized_examples(
+        optimized_module: dspy.Module,
+        fallback: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        """Extract curated/bootstrapped demos from the compiled module.
+
+        After optimisation DSPy stores selected few-shot demos on each
+        ``Predict`` sub-module's ``.demos`` attribute.  These are
+        ``dspy.Example`` objects that the optimizer chose as the most
+        effective demonstrations.  We convert them back to plain dicts
+        so they can be serialised into ``OptimizedConfig``.
+
+        Falls back to the original seed examples when the compiled
+        module has no demos or an error occurs during extraction.
+        """
+        try:
+            for _name, submod in optimized_module.named_sub_modules():
+                if not isinstance(submod, dspy.Predict):
+                    continue
+                demos: list[Any] | None = getattr(submod, "demos", None)
+                if not demos:
+                    continue
+
+                extracted: list[dict[str, Any]] = []
+                for demo in demos:
+                    # dspy.Example supports dict-like access
+                    if hasattr(demo, "toDict"):
+                        extracted.append(demo.toDict())
+                    elif isinstance(demo, dict):
+                        extracted.append(demo)
+                    else:
+                        extracted.append(dict(demo))
+
+                if extracted:
+                    logger.info(
+                        "Extracted %d optimized examples from compiled module.",
+                        len(extracted),
+                    )
+                    return extracted
+        except Exception:
+            logger.debug("Could not extract optimized examples; using seed fallback.")
+
+        logger.info("No optimized demos found; returning seed examples.")
         return fallback
