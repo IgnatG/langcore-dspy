@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.1 (2026-02-23)
+
+### Bug Fixes
+
+- Update Python version in CI and refine langcore dependency in project files
+  ([`b83d489`](https://github.com/IgnatG/langcore-dspy/commit/b83d48925a42c9fbece34560ee3e33da060582ed))
+
+
 ## v1.1.0 (2026-02-23)
 
 ### Features
