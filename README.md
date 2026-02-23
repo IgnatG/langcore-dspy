@@ -1,30 +1,38 @@
-# LangCore DSPy Optimizer
+# LangCore DSPy
 
-A plugin for [LangCore](https://github.com/google/langcore) that uses [DSPy](https://dspy.ai/) to automatically optimize extraction prompts and few-shot examples. Inspired by [LangStruct](https://github.com/langstruct/langstruct)'s DSPy integration.
+> Procider plugin for [LangCore](https://github.com/ignatg/langcore) — automatically optimize extraction prompts and few-shot examples using [DSPy](https://dspy.ai/).
 
-> **Note**: This is a third-party plugin for LangCore. For the main LangCore library, visit [google/langcore](https://github.com/google/langcore).
+[![PyPI version](https://img.shields.io/pypi/v/langcore-dspy)](https://pypi.org/project/langcore-dspy/)
+[![Python](https://img.shields.io/pypi/pyversions/langcore-dspy)](https://pypi.org/project/langcore-dspy/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
+---
+
+## Overview
+
+**langcore-dspy** is a plugin for [LangCore](https://github.com/ignatg/langcore) that uses DSPy's optimization framework to automatically refine extraction prompts and curate few-shot examples. Given training data, it searches for the best prompt description and example set to maximize extraction precision and recall — then produces a portable `OptimizedConfig` you can save, load, and pass directly to `lx.extract()`.
+
+---
+
+## Features
+
+- **MIPROv2 optimizer** — fast, general-purpose prompt optimization that explores candidate prompts and selects the best performer
+- **GEPA optimizer** — reflective, feedback-driven optimization with falling back to `BootstrapFewShot` when `dspy.GEPA` is unavailable
+- **Optimizer aliases** — use `mipro`, `mipro_v2`, or `miprov2` interchangeably; `gepa` for the reflective optimizer
+- **Persist & load configs** — save optimized configurations to disk (`config.json` + `examples.json`) and reload them later
+- **Built-in evaluation** — measure precision, recall, and F1 on held-out test sets with per-document detail
+- **Native LangCore integration** — pass `optimized_config` directly to `lx.extract()`, which overrides `prompt_description` and `examples`
+- **Any LLM backend** — works with any model supported by DSPy's LM abstraction (OpenAI, Google, Anthropic, etc.)
+
+---
 
 ## Installation
 
-Install from source:
-
 ```bash
-git clone <repo-url>
-cd langcore-dspy
-pip install -e .
+pip install langcore-dspy
 ```
 
-## Features at a Glance
-
-| Feature | langcore-dspy | LangStruct |
-|---|---|---|
-| **MIPROv2 optimizer** | ✅ Fast, general-purpose | ✅ |
-| **GEPA optimizer** | ✅ Reflective, feedback-driven (falls back to BootstrapFewShot) | ✅ |
-| **Optimizer aliases** | ✅ `mipro`, `mipro_v2`, `gepa` | ❌ |
-| **Persist optimized configs** | ✅ `save()` / `load()` to directory | ✅ |
-| **Evaluation (precision/recall/F1)** | ✅ `evaluate()` with per-document details | ⚠️ Basic metrics |
-| **LangCore integration** | ✅ Native `optimized_config` parameter | ❌ (separate pipeline) |
-| **Any LLM backend** | ✅ Via DSPy's LM abstraction | ✅ |
+---
 
 ## Quick Start
 
@@ -34,7 +42,7 @@ pip install -e .
 from langcore_dspy import DSPyOptimizer
 import langcore as lx
 
-# Prepare training data
+# Prepare few-shot examples to guide optimization
 examples = [
     lx.data.ExampleData(
         text="Invoice INV-001 for $500 due Jan 1, 2024",
@@ -45,11 +53,11 @@ examples = [
     )
 ]
 
+# Training data the optimizer will use to evaluate candidates
 train_texts = [
     "Invoice INV-002 totalling $1,200 payable by March 15, 2024",
     "Bill INV-003: $750, due date April 30, 2024",
 ]
-
 expected_results = [
     [lx.data.Extraction("invoice", "INV-002",
                         attributes={"amount": "1200", "due": "2024-03-15"})],
@@ -87,19 +95,24 @@ The saved directory contains:
 - `config.json` — optimized prompt description and metadata
 - `examples.json` — curated few-shot examples
 
-### 3. Use in Extraction
+### 3. Use in LangCore Extraction
 
-Pass the optimized config directly to `lx.extract()`:
+Pass the optimized config directly to `lx.extract()` — it overrides `prompt_description` and `examples` with the optimized values:
 
 ```python
+import langcore as lx
+from langcore_dspy import OptimizedConfig
+
+config = OptimizedConfig.load("./optimized_invoice_extractor")
+
 result = lx.extract(
     text_or_documents="Invoice INV-100 for $2,300 due June 1, 2024",
     model_id="gemini-2.5-flash",
     optimized_config=config,
 )
-```
 
-When `optimized_config` is provided, it overrides `prompt_description` and `examples` with the optimized values.
+print(result)
+```
 
 ### 4. Evaluate Performance
 
@@ -125,24 +138,30 @@ print(f"Recall:    {metrics['recall']:.2f}")
 print(f"F1:        {metrics['f1']:.2f}")
 ```
 
+---
+
 ## Supported Optimizers
 
 | Optimizer | Key | Aliases | Description |
-|---|---|---|---|
+|-----------|-----|---------|-------------|
 | **MIPROv2** | `miprov2` | `mipro`, `mipro_v2` | Fast, general-purpose prompt optimization. Recommended default. |
 | **GEPA** | `gepa` | — | Reflective optimizer with feedback-driven refinement. Falls back to `BootstrapFewShot` if `dspy.GEPA` is unavailable. |
 
+---
+
 ## API Reference
 
-### `DSPyOptimizer`
+### DSPyOptimizer
 
 ```python
 DSPyOptimizer(model_id: str, api_key: str | None = None, **lm_kwargs)
 ```
 
-- `model_id` — DSPy-compatible model identifier (e.g., `"openai/gpt-4o-mini"`, `"gemini/gemini-2.5-flash"`)
-- `api_key` — Optional API key for the model provider
-- `**lm_kwargs` — Additional keyword arguments forwarded to `dspy.LM()`
+| Parameter | Description |
+|-----------|-------------|
+| `model_id` | DSPy-compatible model identifier (e.g., `"openai/gpt-4o-mini"`, `"gemini/gemini-2.5-flash"`) |
+| `api_key` | Optional API key for the model provider |
+| `**lm_kwargs` | Additional keyword arguments forwarded to `dspy.LM()` |
 
 #### `optimize()`
 
@@ -159,7 +178,7 @@ optimizer.optimize(
 ) -> OptimizedConfig
 ```
 
-### `OptimizedConfig`
+### OptimizedConfig
 
 ```python
 @dataclasses.dataclass
@@ -169,14 +188,61 @@ class OptimizedConfig:
     metadata: dict
 ```
 
-- `save(path)` — persist to directory
-- `load(path)` — classmethod, restore from directory
-- `evaluate(test_texts, expected_results, extract_fn, model_id)` — compute precision/recall/F1
+| Method | Description |
+|--------|-------------|
+| `save(path)` | Persist to a directory (`config.json` + `examples.json`) |
+| `load(path)` | Class method — restore from a saved directory |
+| `evaluate(test_texts, expected_results, extract_fn, model_id)` | Compute precision, recall, and F1 on a test set |
+
+---
+
+## Composing with Other Plugins
+
+langcore-dspy produces an `OptimizedConfig` that works with any LangCore provider stack:
+
+```python
+import langcore as lx
+from langcore_dspy import OptimizedConfig
+from langcore_audit import AuditLanguageModel, LoggingSink
+from langcore_guardrails import GuardrailLanguageModel, SchemaValidator, OnFailAction
+
+# Load optimized prompt + examples
+config = OptimizedConfig.load("./optimized_invoice_extractor")
+
+# Build provider stack
+llm = lx.factory.create_model(
+    lx.factory.ModelConfig(model_id="litellm/gpt-4o", provider="LiteLLMLanguageModel")
+)
+guarded = GuardrailLanguageModel(
+    model_id="guardrails/gpt-4o", inner=llm,
+    validators=[SchemaValidator(Invoice, on_fail=OnFailAction.REASK)],
+)
+audited = AuditLanguageModel(
+    model_id="audit/gpt-4o", inner=guarded,
+    sinks=[LoggingSink()],
+)
+
+# Extract with optimized config + full provider stack
+result = lx.extract(
+    text_or_documents="Invoice INV-500 for $8,200 due Dec 31, 2025",
+    model=audited,
+    optimized_config=config,
+)
+```
+
+---
+
+## Development
+
+```bash
+pip install -e ".[dev]"
+pytest
+```
 
 ## Requirements
 
-- Python ≥ 3.10
-- `langcore` ≥ 1.2.0
+- Python ≥ 3.12
+- `langcore`
 - `dspy` ≥ 2.6.0
 
 ## License
