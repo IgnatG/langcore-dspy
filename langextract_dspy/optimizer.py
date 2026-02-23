@@ -9,13 +9,14 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import dspy
 
-from langextract.core.data import ExampleData, Extraction
-
 from langextract_dspy.config import OptimizedConfig
+
+if TYPE_CHECKING:
+    from langextract.core.data import ExampleData, Extraction
 
 __all__ = ["DSPyOptimizer"]
 
@@ -286,7 +287,7 @@ class DSPyOptimizer:
         )
 
         trainset: list[dspy.Example] = []
-        for text, expected in zip(train_texts, expected_results):
+        for text, expected in zip(train_texts, expected_results, strict=True):
             expected_json = _json.dumps(
                 [
                     {
@@ -453,7 +454,7 @@ class DSPyOptimizer:
                     instruction = getattr(sig, "instructions", None)
                     if instruction and isinstance(instruction, str):
                         return instruction
-        except Exception:  # noqa: BLE001
+        except Exception:
             logger.debug("Could not extract optimised prompt; using fallback.")
 
         return fallback

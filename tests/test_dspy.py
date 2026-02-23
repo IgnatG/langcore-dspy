@@ -9,14 +9,11 @@ from __future__ import annotations
 
 import asyncio
 import json
-import pathlib
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from unittest import mock
 
-import pytest
-
 import dspy
-
+import pytest
 from langextract.core import types as lx_types
 from langextract.core.data import ExampleData, Extraction
 
@@ -27,6 +24,9 @@ from langextract_dspy.config import (
     _extraction_key_set,
     _flatten_extractions,
 )
+
+if TYPE_CHECKING:
+    import pathlib
 
 
 # ------------------------------------------------------------------ #
@@ -147,7 +147,7 @@ class TestOptimizedConfigPersistence:
         assert loaded.metadata["optimizer"] == "miprov2"
 
         # Check examples content
-        for orig, restored in zip(cfg.examples, loaded.examples):
+        for orig, restored in zip(cfg.examples, loaded.examples, strict=True):
             assert orig.text == restored.text
             assert len(orig.extractions) == len(restored.extractions)
 
@@ -565,9 +565,9 @@ class TestScoringHelpers:
 
     def test_f1_metric_perfect(self) -> None:
         """F1 metric: perfect prediction yields 1.0."""
-        from langextract_dspy.optimizer import _f1_metric
-
         import dspy
+
+        from langextract_dspy.optimizer import _f1_metric
 
         expected = json.dumps([{"extraction_class": "A", "extraction_text": "a"}])
         example = dspy.Example(expected_json=expected)
@@ -581,9 +581,9 @@ class TestScoringHelpers:
 
     def test_f1_metric_no_match(self) -> None:
         """F1 metric: no overlap yields 0.0."""
-        from langextract_dspy.optimizer import _f1_metric
-
         import dspy
+
+        from langextract_dspy.optimizer import _f1_metric
 
         expected = json.dumps([{"extraction_class": "A", "extraction_text": "a"}])
         prediction = dspy.Prediction(
@@ -650,7 +650,7 @@ class TestExtractOptimizedConfig:
 
     def test_optimized_config_none_is_noop(self) -> None:
         """optimized_config=None doesn't change behaviour."""
-        from langextract.core import base_model, data
+        from langextract.core import base_model
 
         class _DummyModel(base_model.BaseLanguageModel):
             def __init__(self) -> None:

@@ -155,7 +155,7 @@ class OptimizedConfig:
         total_fp = 0
         total_fn = 0
 
-        for text, expected in zip(test_texts, expected_results):
+        for text, expected in zip(test_texts, expected_results, strict=True):
             result = extract_fn(
                 text,
                 prompt_description=self.prompt_description,

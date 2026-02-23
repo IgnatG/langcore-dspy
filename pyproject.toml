@@ -14,9 +14,6 @@ dependencies = [
     "dspy>=2.6.0",
 ]
 
-[tool.uv.sources]
-langextract-core = { path = "../langextract-core" }
-
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["langextract_dspy*"]
