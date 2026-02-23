@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.0 (2026-02-23)
+
+### Features
+
+- Updated the folder structure
+  ([`4afe842`](https://github.com/IgnatG/langcore-dspy/commit/4afe84203ffa5707407f0998a4cebb2f2d7ee608))
+
+
 ## v1.0.2 (2026-02-23)
 
 ### Bug Fixes
