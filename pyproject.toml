@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "langcore-dspy"
-version = "1.1.1"
+version = "1.1.2"
 description = "DSPy-powered prompt optimization plugin for LangCore — auto-optimize extraction prompts with MIPROv2 and GEPA"
 readme = "README.md"
 requires-python = ">=3.12"

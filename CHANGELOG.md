@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.1.2 (2026-02-24)
+
+### Bug Fixes
+
+- Update dspy dependency version to >=3.1.3 and increment langcore-dspy version to 1.1.1
+  ([`fc959b4`](https://github.com/IgnatG/langcore-dspy/commit/fc959b435463e74492f63d6b66310dbadc7cf9cd))
+
+### Documentation
+
+- Update README for clarity and structure; enhance installation and feature sections
+  ([`65dae41`](https://github.com/IgnatG/langcore-dspy/commit/65dae418c3997cfac18f3674240648cafd276164))
+
+
 ## v1.1.1 (2026-02-23)
 
 ### Bug Fixes
